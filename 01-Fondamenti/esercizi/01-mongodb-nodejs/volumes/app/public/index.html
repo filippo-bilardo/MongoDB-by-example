@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca - MongoDB + Node.js</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        h1 { color: #667eea; font-size: 2.5em; margin-bottom: 10px; }
+        .subtitle { color: #666; font-size: 1.1em; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-value { font-size: 2.5em; font-weight: bold; color: #667eea; }
+        .stat-label { color: #666; margin-top: 5px; }
+        .search-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        button {
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+        }
+        button:hover { background: #5568d3; }
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .book-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .book-title { font-size: 1.4em; color: #333; margin-bottom: 10px; }
+        .book-author { color: #667eea; font-size: 1.1em; margin-bottom: 15px; }
+        .book-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: #666;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .badge-disponibile { background: #4ade80; color: white; }
+        .badge-non-disponibile { background: #ef4444; color: white; }
+        .tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+        .tag {
+            background: #e0e7ff;
+            color: #667eea;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: white;
+            font-size: 1.5em;
+        }
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Biblioteca Digitale</h1>
+            <p class="subtitle">Sistema di gestione biblioteca con MongoDB e Node.js</p>
+        </header>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totale">0</div>
+                <div class="stat-label">Libri Totali</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="disponibili">0</div>
+                <div class="stat-label">Disponibili</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="prestiti">0</div>
+                <div class="stat-label">In Prestito</div>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Cerca per titolo, autore o genere...">
+            <button onclick="searchBooks()">🔍 Cerca</button>
+            <button onclick="loadBooks()">↻ Tutti i libri</button>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="loading" class="loading">Caricamento libri...</div>
+        <div id="books" class="books-grid"></div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/stats`);
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('totale').textContent = result.data.totale;
+                    document.getElementById('disponibili').textContent = result.data.disponibili;
+                    document.getElementById('prestiti').textContent = result.data.non_disponibili;
+                }
+            } catch (error) {
+                console.error('Errore caricamento statistiche:', error);
+            }
+        }
+
+        async function loadBooks() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('books').innerHTML = '';
+                document.getElementById('error').style.display = 'none';
+                
+                const response = await fetch(`${API_URL}/libri`);
+                const result = await response.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                if (result.success) {
+                    displayBooks(result.data);
+                    loadStats();
+                } else {
+                    showError('Errore nel caricamento dei libri');
+                }
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                showError('Errore di connessione al server: ' + error.message);
+            }
+        }
+
+        async function searchBooks() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) { loadBooks(); return; }
+            
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('books').innerHTML = '';
+                
+                const response = await fetch(`${API_URL}/cerca/${encodeURIComponent(query)}`);
+                const result = await response.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                if (result.success) displayBooks(result.data);
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                showError('Errore nella ricerca: ' + error.message);
+            }
+        }
+
+        function displayBooks(books) {
+            const container = document.getElementById('books');
+            if (books.length === 0) {
+                container.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">Nessun libro trovato</p>';
+                return;
+            }
+            container.innerHTML = books.map(libro => `
+                <div class="book-card">
+                    <div class="book-title">${libro.titolo}</div>
+                    <div class="book-author">di ${libro.autore}</div>
+                    <div class="book-info">
+                        <span>Anno: ${libro.anno}</span>
+                        <span>Genere: ${libro.genere}</span>
+                    </div>
+                    <div class="book-info">
+                        <span>Copie: ${libro.copie}</span>
+                        <span class="badge ${libro.disponibile ? 'badge-disponibile' : 'badge-non-disponibile'}">
+                            ${libro.disponibile ? '✓ Disponibile' : '✗ Non disponibile'}
+                        </span>
+                    </div>
+                    ${libro.tags && libro.tags.length > 0 ? `
+                        <div class="tags">
+                            ${libro.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchBooks();
+        });
+
+        loadBooks();
+    </script>
+</body>
+</html>

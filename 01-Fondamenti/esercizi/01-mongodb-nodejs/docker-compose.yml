@@ -1,0 +1,124 @@
+# Definizione dei servizi dell'applicazione
+# Questo file docker-compose orchestra 3 container:
+# 1) MongoDB (database)
+# 2) mongo-express (interfaccia web di amministrazione)
+# 3) nodejs-app (applicazione backend)
+#
+# Nota: i valori tra ${...} vengono letti dal file .env nella stessa cartella.
+services:
+  # Servizio database MongoDB
+  mongodb:
+    # Immagine ufficiale MongoDB versione 7.0
+    image: mongo:7.0
+    # Nome esplicito del container (utile per debug e comandi docker)
+    container_name: mongodb_server
+    # Variabili di inizializzazione del DB (lette dal file .env)
+    # Vengono usate al primo avvio per creare utente admin e database iniziale.
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+    # Persistenza dati + script di bootstrap iniziale
+    # - mongo-data: mantiene i dati anche dopo stop/rimozione del container
+    # - init-mongo.js: script eseguito automaticamente all'inizializzazione
+    volumes:
+      - ./volumes/mongo-data:/data/db
+      - ./volumes/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    # Connessione alla rete dedicata
+    # I servizi nella stessa rete comunicano usando il nome del servizio (es. "mongodb").
+    networks:
+      - mongodb_network
+    # Espone MongoDB sulla porta standard
+    # Formato "host:container" => Mongo disponibile su localhost:27017.
+    ports:
+      - "27017:27017"
+    # Verifica periodica dello stato del database
+    # Se il ping fallisce ripetutamente, il servizio risulta "unhealthy".
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    # Riavvio automatico del container salvo stop manuale
+    restart: unless-stopped
+
+  # Interfaccia web di amministrazione per MongoDB
+  mongo-express:
+    # Tag latest: aggiorna automaticamente all'ultima versione disponibile.
+    image: mongo-express:latest
+    # Nome esplicito del container per identificazione immediata
+    container_name: mongo_express_ui
+    # Avvio solo dopo che MongoDB è healthy
+    # Evita che mongo-express parta prima che il DB sia realmente pronto.
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    # Credenziali e URL di connessione per mongo-express
+    # L'URL usa il nome del servizio "mongodb" come hostname interno Docker.
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGOEXPRESS_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGOEXPRESS_PASSWORD}
+    # Rete condivisa con gli altri servizi
+    networks:
+      - mongodb_network
+    # Espone l'interfaccia web su localhost:8081
+    # Accesso browser: http://localhost:8081
+    ports:
+      - "8081:8081"
+    # Riavvio automatico del container salvo stop manuale
+    restart: unless-stopped
+
+  # Applicazione Node.js che usa MongoDB
+  nodejs-app:
+    # Build locale usando il Dockerfile presente nella directory corrente.
+    build: .
+    # Nome esplicito del container dell'applicazione
+    container_name: nodejs_app
+    # Avvio solo dopo che MongoDB è healthy
+    # Garantisce che la stringa di connessione punti a un DB raggiungibile.
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    # Configurazione connessione DB e porta applicativa
+    # authSource=admin indica dove autenticare l'utente root.
+    environment:
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=admin
+      PORT: 3000
+    # Volumi montati nel container Node.js:
+    #
+    # 1) ./volumes/app:/usr/src/app
+    #    Monta la cartella locale "volumes/app" dentro il container come "/usr/src/app".
+    #    Ogni modifica al codice sorgente sull'host è immediatamente visibile nel container,
+    #    abilitando il live-reload (utile in sviluppo con nodemon o strumenti simili).
+    #
+    # 2) /usr/src/app/node_modules  (volume anonimo)
+    #    Crea un volume Docker separato per la cartella node_modules DENTRO il container.
+    #    Questo "nasconde" la cartella node_modules dell'host (se presente), evitando che
+    #    moduli compilati per un OS diverso (es. Windows/Mac) sovrascrivano quelli installati
+    #    correttamente dentro il container Linux durante la fase di build (npm install).
+    volumes:
+      - ./volumes/app:/usr/src/app
+      - /usr/src/app/node_modules
+    # Rete condivisa con DB e interfaccia di amministrazione
+    networks:
+      - mongodb_network
+    # Espone il servizio Node.js sulla porta 3000
+    # Accesso applicazione: http://localhost:3000
+    ports:
+      - "3000:3000"
+    # Avvio in modalità sviluppo
+    # Richiede che nel package.json esista lo script "dev".
+    command: npm run dev
+    # Riavvio automatico del container salvo stop manuale
+    restart: unless-stopped
+
+# Rete dedicata per i servizi MongoDB
+# Rete bridge personalizzata per isolare e organizzare la comunicazione interna.
+networks:
+  mongodb_network:
+    driver: bridge
+    name: mongodb_network
