@@ -2,7 +2,7 @@
 
 ## Introduzione
 
-Benvenuti al corso "MongoDB by Example"! Questo corso di laboratorio è progettato per fornire una comprensione pratica di MongoDB attraverso esercitazioni progressive. Partendo dalla installazione e dai primi comandi fino alla integrazione con Node.js e alle tecniche di ottimizzazione, imparerai a usare MongoDB come database per applicazioni web moderne.
+Benvenuti al corso "MongoDB by Example"! Questo corso è progettato per fornire una comprensione pratica di MongoDB attraverso esercitazioni progressive. Partendo dalla installazione e dai primi comandi fino alla integrazione con Node.js e alle tecniche di ottimizzazione, imparerai a usare MongoDB come database per applicazioni web moderne.
 
 MongoDB è un database NoSQL orientato ai documenti: invece di tabelle e righe (come nei database relazionali), i dati vengono memorizzati in **documenti JSON** raggruppati in **collezioni**. Questo modello è flessibile, scalabile e si integra naturalmente con JavaScript e Node.js.
 
