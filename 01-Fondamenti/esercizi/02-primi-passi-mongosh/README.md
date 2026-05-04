@@ -54,19 +54,19 @@ Al termine di questa esercitazione lo studente sarà in grado di:
 ### Architettura Semplificata
 
 ```
-┌─────────────────────────────────────────────────┐
-│           mongo_network (bridge)                │
-│                                                 │
+┌────────────────────────────────────────────────┐
+│           mongo_network (bridge)               │
+│                                                │
 │  ┌──────────────────┐    ┌──────────────────┐  │
 │  │    mongodb       │    │  mongo-express   │  │
 │  │    MongoDB 7.0   │◄───┤  GUI Web         │  │
 │  │    porta 27017   │    │  porta 8081      │  │
 │  └──────────────────┘    └──────────────────┘  │
-│          ▲                                      │
-│          │                                      │
-│    mongosh (CLI)                                │
-│    via docker exec                              │
-└─────────────────────────────────────────────────┘
+│          ▲                                     │
+│          │                                     │
+│    mongosh (CLI)                               │
+│    via docker exec                             │
+└────────────────────────────────────────────────┘
 ```
 
 **Differenze con l'esercitazione 01:**
