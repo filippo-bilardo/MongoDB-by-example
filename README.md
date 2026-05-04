@@ -87,13 +87,13 @@ MongoDB è un database NoSQL orientato ai documenti: invece di tabelle e righe (
 
 ### Modulo 4 — Schema e modellazione dei dati
 
-11. [Modellazione dei dati in MongoDB](./04-Schema/01-Modellazione/README.md)
+12. [Modellazione dei dati in MongoDB](./04-Schema/01-Modellazione/README.md)
     - Documenti embedded vs riferimenti (relazioni)
     - Quando usare l'embedding, quando i riferimenti
     - Pattern comuni: one-to-one, one-to-many, many-to-many
     - Validazione dello schema con `$jsonSchema`
 
-12. [Indici e prestazioni](./04-Schema/02-Indici/README.md)
+13. [Indici e prestazioni](./04-Schema/02-Indici/README.md)
     - Cos'è un indice e perché migliora le query
     - `createIndex`: indici singoli e composti
     - Indici speciali: unico (`unique`), sparse, TTL (scadenza automatica)
@@ -101,19 +101,19 @@ MongoDB è un database NoSQL orientato ai documenti: invece di tabelle e righe (
 
 ### Modulo 5 — MongoDB con Node.js
 
-13. [Connessione a MongoDB da Node.js](./05-NodeJS/01-Connessione/README.md)
+14. [Connessione a MongoDB da Node.js](./05-NodeJS/01-Connessione/README.md)
     - Il driver ufficiale `mongodb` (npm)
     - `MongoClient`, connection string, pool di connessioni
     - Gestione degli errori e chiusura della connessione
     - Variabili d'ambiente per le credenziali (`.env`, `dotenv`)
 
-14. [CRUD da Node.js](./05-NodeJS/02-CRUD/README.md)
+15. [CRUD da Node.js](./05-NodeJS/02-CRUD/README.md)
     - Operazioni CRUD usando il driver Node.js
     - Callback, Promise e `async/await`
     - Gestione degli errori asincroni con `try/catch`
     - Struttura di un modulo di accesso al database (Data Access Layer)
 
-15. [API REST con Express e MongoDB](./05-NodeJS/03-REST-API/README.md)
+16. [API REST con Express e MongoDB](./05-NodeJS/03-REST-API/README.md)
     - Progettare endpoint CRUD per una risorsa
     - `GET /risorse`, `GET /risorse/:id`, `POST`, `PUT`, `DELETE`
     - Validazione dell'input lato server
@@ -121,19 +121,19 @@ MongoDB è un database NoSQL orientato ai documenti: invece di tabelle e righe (
 
 ### Modulo 6 — Mongoose (ODM)
 
-16. [Introduzione a Mongoose](./06-Mongoose/01-Intro/README.md)
+17. [Introduzione a Mongoose](./06-Mongoose/01-Intro/README.md)
     - Cos'è un ODM (Object Document Mapper)
     - Installazione e connessione con Mongoose
     - Definire uno Schema e un Model
     - Tipi di dati, vincoli, valori predefiniti
 
-17. [Operazioni CRUD con Mongoose](./06-Mongoose/02-CRUD/README.md)
+18. [Operazioni CRUD con Mongoose](./06-Mongoose/02-CRUD/README.md)
     - Creare documenti: `new Model()` e `.save()`, oppure `Model.create()`
     - Leggere: `find`, `findById`, `findOne`
     - Aggiornare: `findByIdAndUpdate`, `findOneAndUpdate`
     - Eliminare: `findByIdAndDelete`, `deleteMany`
 
-18. [Validazione e middleware con Mongoose](./06-Mongoose/03-Avanzato/README.md)
+19. [Validazione e middleware con Mongoose](./06-Mongoose/03-Avanzato/README.md)
     - Validatori built-in: `required`, `min`, `max`, `enum`, `match`
     - Validatori custom
     - Middleware (hook) `pre` e `post`: `save`, `validate`, `remove`
@@ -142,7 +142,7 @@ MongoDB è un database NoSQL orientato ai documenti: invece di tabelle e righe (
 
 ### Modulo 7 — Progetto finale
 
-19. [Progetto — Applicazione CRUD completa](./07-Progetto/01-Progetto/README.md)
+20. [Progetto — Applicazione CRUD completa](./07-Progetto/01-Progetto/README.md)
     - Analisi dei requisiti e modellazione dei dati
     - Backend con Express, Mongoose e autenticazione base
     - Frontend con fetch API per consumare le API REST
@@ -173,11 +173,37 @@ Si consiglia di seguire i moduli nell'ordine proposto: ogni modulo si basa sui c
 - [Documentazione Mongoose](https://mongoosejs.com/docs/)
 - [MongoDB Compass (GUI)](https://www.mongodb.com/products/tools/compass)
 
+## Stato del Progetto
+
+### Completato ✅
+- **Modulo 1 - Fondamenti** (4 capitoli + 2 esercitazioni Docker complete)
+- **Modulo 2 - CRUD** (4 capitoli teorici)
+- **Modulo 3 - Query Avanzate** (3 capitoli teorici)
+
+### In Sviluppo 🔄
+- **Modulo 4 - Schema** (da creare)
+- **Modulo 5 - NodeJS** (da creare)
+- **Modulo 6 - Mongoose** (da creare)
+- **Modulo 7 - Progetto** (da creare)
+
+### Esercitazioni Disponibili
+1. **01-mongodb-nodejs** - Full-stack (MongoDB + Node.js + Mongo Express)
+   - REST API completa con 8 endpoint
+   - Frontend dashboard interattivo
+   - 65+ domande di riflessione
+   - Valutazione su scala 60-100%
+
+2. **02-primi-passi-mongosh** - MongoDB Shell
+   - Focus su comandi mongosh
+   - 3 esercizi pratici (Cinema, Scuola, Ristorante)
+   - Approccio didattico progressivo
+
 ## TODO
 
-- [ ] Aggiungere esercitazioni su transazioni multi-documento
-- [ ] Sezione su replica set e sharding (concetti introduttivi)
-- [ ] Sezione su MongoDB Atlas (cloud)
+- [ ] Completare guide moduli 4-7
+- [ ] Aggiungere esercitazioni per moduli 2-7
+- [ ] Sezione su transazioni multi-documento
+- [ ] Sezione su replica set e sharding
 - [ ] Integrazione con framework frontend (React)
 - [ ] Glossario dei termini MongoDB vs SQL
 
